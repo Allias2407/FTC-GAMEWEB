@@ -1,0 +1,119 @@
+*{
+    padding: 0;
+    margin: 0;
+    text-decoration: none;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+.Home {
+    position: relative;
+    min-height: 100vh;
+    background: linear-gradient(to bottom left, #00122d 0%, #16296f 100%);
+    display: flex;
+    justify-content: end;
+    align-items: center;
+    padding: 0 90px;
+    overflow: hidden;
+}
+
+header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 99;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 30px 90px;
+    color: white;
+    font-size: 24px;
+}
+
+header nav a {
+    font-size: 26px;
+    margin-left: 60px;
+    color: white;
+    transition: .3s;
+}
+
+header nav .active,
+header nav a:hover {
+    color: #61e7ff;
+}
+
+.text-box {
+    width: 50%;
+    z-index: 99;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: end;
+}
+
+.text-box h1 {
+    color: #61e7ff;
+    font-size: 75px;
+}
+
+.text-box h2 {
+    color: #61e7ff;
+    font-size: 40px;
+}
+
+.text-box p {
+    margin: 30px 0;
+    font-size: 19px;
+    width: 82%;
+    line-height: 220%;
+    color: #bababa;
+}
+
+.btn-box {
+    display: flex;
+    gap: 20px;
+}
+
+.btn {
+    color: black;
+    padding: 15px 35px;
+    font-size: 24px;
+    border: 2px solid #61e7ff;
+    background-color: #61e7ff;
+    box-shadow: 0 0 15px #61e7ff;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: .3s;
+}
+
+.btn:hover,
+.btn:nth-child(1),
+.btn:nth-child(2) {
+    color: white;
+    background: transparent;
+    box-shadow: none;
+}
+
+.btn:nth-child(1):hover,
+.btn:nth-child(2):hover {
+    color: black;
+    background-color: #61e7ff;
+    box-shadow: 0 0 15px #61e7ff;
+}
+
+.img-box img {
+    position: absolute;
+    pointer-events: none;
+    left: 0;
+    bottom: 0;
+    height: 100%;
+}
+
+.img-box img {
+    max-width: 43%;
+    height: auto;
+    margin-left: 7rem;
+    margin-bottom: 3rem;
+}
