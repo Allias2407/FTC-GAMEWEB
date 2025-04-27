@@ -7,20 +7,20 @@ var DIRECTION = {
     RIGHT: 4
 };
  
-var rounds = [3, 3, 2, 2, 1];
-var colors = ['#4B0082', '#720e9e', '#005A9C', '#1d1160', '#452c63'];
+var rounds = [1, 1, 1, 1, 2];
+var colors = ['#8B0000', '#CD5C5C', '#F08080', '#58111A', '#B22222'];
  
 // The ball object (The cube that bounces back and forth)
 var Ball = {
     new: function (incrementedSpeed) {
         return {
-            width: 18,
-            height: 18,
+            width: 12,
+            height: 12,
             x: (this.canvas.width / 2) - 9,
             y: (this.canvas.height / 2) - 9,
             moveX: DIRECTION.IDLE,
             moveY: DIRECTION.IDLE,
-            speed: incrementedSpeed || 7 
+            speed: incrementedSpeed || 8 
         };
     }
 };
@@ -32,6 +32,7 @@ var Ai = {
             width: 18,
             height: 180,
             x: side === 'left' ? 150 : this.canvas.width - 150,
+            y1: (this.canvas.height1 / 2) - 35,
             y: (this.canvas.height / 2) - 35,
             score: 0,
             move: DIRECTION.IDLE,
@@ -56,11 +57,11 @@ var Game = {
         this.ball = Ball.new.call(this);
  
         // change the speed for harder AI
-        this.ai.speed = 5;
+        this.ai.speed = 6;
         this.running = this.over = false;
         this.turn = this.ai;
         this.timer = this.round = 0;
-        this.color = '#8c52ff';
+        this.color = '#660000';
  
         Pong.menu();
         Pong.listen();
@@ -198,6 +199,7 @@ var Game = {
                 this.color = this._generateRoundColor();
                 this.player.score = this.ai.score = 0;
                 this.player.speed += 0.5;
+                this.player.height -= 30,
                 this.ai.speed += 1;
                 this.ball.speed += 1;
                 this.round += 1;

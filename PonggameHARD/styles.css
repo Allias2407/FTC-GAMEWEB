@@ -50,7 +50,7 @@ p {
     font-size: 20px;
 }
 
-.hard a {
+.nor a {
     text-decoration: none;
     color: #61e7ff;
     font-size: 20px;
@@ -59,6 +59,6 @@ p {
     border: #61e7ff solid 2px;
 }
 
-.hard {
+.nor {
     margin-top: 20px;
 }
