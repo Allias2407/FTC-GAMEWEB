@@ -7,7 +7,7 @@ var DIRECTION = {
     RIGHT: 4
 };
  
-var rounds = [3, 3, 2, 2, 1];
+var rounds = [3, 3, 3, 3, 3];
 var colors = ['#4B0082', '#720e9e', '#005A9C', '#1d1160', '#452c63'];
  
 // The ball object (The cube that bounces back and forth)
@@ -20,7 +20,7 @@ var Ball = {
             y: (this.canvas.height / 2) - 9,
             moveX: DIRECTION.IDLE,
             moveY: DIRECTION.IDLE,
-            speed: incrementedSpeed || 7 
+            speed: incrementedSpeed || 5
         };
     }
 };
@@ -35,7 +35,7 @@ var Ai = {
             y: (this.canvas.height / 2) - 35,
             score: 0,
             move: DIRECTION.IDLE,
-            speed: 8
+            speed: 5
         };
     }
 };
@@ -56,7 +56,7 @@ var Game = {
         this.ball = Ball.new.call(this);
  
         // change the speed for harder AI
-        this.ai.speed = 5;
+        this.ai.speed = 3.5;
         this.running = this.over = false;
         this.turn = this.ai;
         this.timer = this.round = 0;

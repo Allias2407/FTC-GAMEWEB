@@ -7,15 +7,15 @@ var DIRECTION = {
     RIGHT: 4
 };
  
-var rounds = [1, 1, 1, 1, 2];
+var rounds = [1, 1, 2];
 var colors = ['#8B0000', '#CD5C5C', '#F08080', '#58111A', '#B22222'];
  
 // The ball object (The cube that bounces back and forth)
 var Ball = {
     new: function (incrementedSpeed) {
         return {
-            width: 12,
-            height: 12,
+            width: 15,
+            height: 15,
             x: (this.canvas.width / 2) - 9,
             y: (this.canvas.height / 2) - 9,
             moveX: DIRECTION.IDLE,
@@ -30,7 +30,7 @@ var Ai = {
     new: function (side) {
         return {
             width: 18,
-            height: 180,
+            height: 150,
             x: side === 'left' ? 150 : this.canvas.width - 150,
             y1: (this.canvas.height1 / 2) - 35,
             y: (this.canvas.height / 2) - 35,
@@ -199,9 +199,11 @@ var Game = {
                 this.color = this._generateRoundColor();
                 this.player.score = this.ai.score = 0;
                 this.player.speed += 0.5;
-                this.player.height -= 30,
-                this.ai.speed += 1;
+                this.player.height -= 25,
+                this.ai.speed += 1.5;
                 this.ball.speed += 1;
+                this.ball.width -= 1;
+                this.ball.height -= 1;
                 this.round += 1;
  
             }
@@ -209,7 +211,7 @@ var Game = {
         // Check to see if the ai/AI has won the round.
         else if (this.ai.score === rounds[this.round]) {
             this.over = true;
-            setTimeout(function () { Pong.endGameMenu('Game Over!'); }, 1000);
+            setTimeout(function () { Pong.endGameMenu('Nice Try Diddy!'); }, 1000);
         }
     },
  
