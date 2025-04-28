@@ -499,7 +499,7 @@ function resetGame() {
     ticks = 0;
     updateEvery = 15;
     updateEveryCurrent = 15;
-    fallSpeed = gridSpace * 0.5;
+    fallSpeed = gridSpace * 0.25;
     pauseGame = false;
     gameOver = false;
 }
