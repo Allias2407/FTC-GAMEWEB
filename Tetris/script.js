@@ -222,11 +222,11 @@ class PlayPiece {
         let xx = 525, yy = 490;
 
         if (this.nextPieceType !== 0 && this.nextPieceType !== 3 && this.nextPieceType !== 5) {
-            xx += (gridSpace * 0.5);
+            xx += (gridSpace * 0.25);
         }
 
         if (this.nextPieceType == 5) {
-            xx -= (gridSpace * 0.5);
+            xx -= (gridSpace * 0.25);
         }
 
         for (let i = 0; i < 4; i++) {
