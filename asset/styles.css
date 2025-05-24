@@ -38,6 +38,20 @@ header nav a {
     transition: .3s;
 }
 
+header > a {
+  background-color: rgb(241, 226, 189);
+  border-radius: 10px;
+}
+
+.logo {
+  background-image: url(/FTC-GAMEWEB/asset/FTC_Logo.png);
+  background-size:contain;
+  background-repeat: no-repeat;
+  background-position: center;
+   width: 50px;
+  height: 50px;
+}
+
 header nav .active,
 header nav a:hover {
     color: #61e7ff;
@@ -69,6 +83,7 @@ header nav a:hover {
     width: 82%;
     line-height: 220%;
     color: #bababa;
+    text-align:center;
 }
 
 .btn-box {

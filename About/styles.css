@@ -6,6 +6,10 @@
     font-family: 'Poppins', sans-serif;
 }
 
+p {
+  font-family: serif;
+}
+
 body{
     padding-top: 6%;
     background: linear-gradient(to bottom left, #00122d 0%, #16296f 100%);
@@ -27,6 +31,20 @@ header {
     padding: 30px 90px;
     color: white;
     font-size: 24px;
+}
+
+header > a {
+  background-color: rgb(241, 226, 189);
+  border-radius: 10px;
+}
+
+.logo {
+  background-image: url(/FTC-GAMEWEB/asset/FTC_Logo.png);
+  background-size:contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 50px;
+  height: 50px;
 }
 
 header nav a {
@@ -56,10 +74,8 @@ header nav a:hover {
   
   .about-pic {
     margin: auto 0;
-  }
-  
-  .about-pic {
-    margin: auto 0;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
   }
   
   .about-container {
@@ -82,8 +98,8 @@ header nav a:hover {
     padding: 1.5rem;
     flex: 1;
     background: white;
+    border-radius: 5px;
     border: rgb(53, 53, 53) 0.1 rem solid;
-    border-radius: 2rem;
     border-color: rgb(163, 163, 163);
     text-align: center;
   }
@@ -93,4 +109,20 @@ header nav a:hover {
     font-size: 1.2rem;
     font-weight: 500;
     text-align: center;
+    line-height: 1.6;
+    text-align:left;
+  }
+
+  h3 {
+    color: rgb(0, 15, 81);
+    font-size: 2.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+
+  .detail-container p {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: rgb(0, 15, 81);
+    margin-top: 0.5rem;
   }

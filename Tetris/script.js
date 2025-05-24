@@ -2,10 +2,11 @@
 const gridSpace = 30;
 
 // Declare variables
-// let gameStarted = false;
-let heldPiece = null; // This will store the held piece
+let gameStarted = false; // Track if game has started
+let heldPiece = null; // Store the held piece
 let canHold = true; // Prevent multiple holds in a row
-
+let lastHoldTime = 0; // Track last hold action for debounce
+const holdCooldown = 200; // 200ms cooldown for hold
 let fallingPiece;
 let gridPieces = [];
 let lineFades = [];
@@ -22,7 +23,7 @@ let fallSpeed = gridSpace * 0.5;
 let pauseGame = false;
 let gameOver = false;
 
-//hold left and right
+// Hold left and right
 let moveHoldLeft = false;
 let moveHoldRight = false;
 let moveHoldTimerLeft = 0;
@@ -46,28 +47,60 @@ const colors = [
   "#ffd700",
 ];
 
-// //press to start
-// function showStartScreen() {
-//   fill("#092e1d"); // dark color text
-//   textAlign(CENTER, CENTER);
-//   textSize(36);
-//   text("Press Any Key to Start", width / 2, height / 2);
-// }
+// Start button properties
+const buttonWidth = 200;
+const buttonHeight = 50;
+const buttonX = (600 - buttonWidth) / 2; // Center on canvas
+const buttonY = 340;
+
+// Hold piece display properties
+const holdBoxX = 10;
+const holdBoxY = 10;
+const holdBoxWidth = 130;
+const holdBoxHeight = 130;
+
+// Function to display the start screen
+function showStartScreen() {
+  // Background
+  background("#e1eeb0");
+  
+  // Title
+  fill("#092e1d");
+  textAlign(CENTER, CENTER);
+  textSize(36);
+  text("Tetris", 300, 200);
+  
+  // Start button
+  fill(gameStarted ? "#cccccc" : "#304550"); // Gray out if game started
+  stroke("#092e1d");
+  strokeWeight(2);
+  rect(buttonX, buttonY, buttonWidth, buttonHeight, 10);
+  
+  // Button text
+  fill("#ffffff");
+  noStroke();
+  textSize(24);
+  text("Start Game", 300, buttonY + buttonHeight / 2);
+}
 
 // Setup function called once at beginning
 function setup() {
   createCanvas(600, 540);
-
-  // Create a new falling piece
+  
+  // Initialize falling piece but don't reset until game starts
   fallingPiece = new PlayPiece();
-  fallingPiece.resetPiece();
-
+  
   // Set the font for the text
   textFont("Ubuntu");
 }
 
 // Draw function called repeatedly
 function draw() {
+  if (!gameStarted) {
+    showStartScreen();
+    return; // Stop here until game starts
+  }
+
   // Define colors used in the game
   const colorDark = "#0d0d0d";
   const colorLight = "#304550";
@@ -97,6 +130,9 @@ function draw() {
   // Draw the lines rectangle
   rect(460, 280, 130, 60, 5, 5);
 
+  // Draw the hold piece rectangle
+  rect(holdBoxX, holdBoxY, holdBoxWidth, holdBoxHeight, 5, 5);
+
   // Draw the score lines
   fill(colorLight);
   rect(450, 85, 150, 20);
@@ -123,28 +159,47 @@ function draw() {
   // Draw the lines inner rectangle
   rect(465, 285, 120, 50, 5, 5);
 
+  // Draw the hold piece inner rectangle
+  rect(holdBoxX + 5, holdBoxY + 5, 120, 120, 5, 5);
+
   // Draw the info labels
   fill(25);
   noStroke();
   textSize(24);
   textAlign(CENTER);
-  text("Score", 525, 85);
-  text("Level", 525, 238);
-  text("Lines", 525, 308);
+  text("Score", 525, 85 - 7);
+  text("Level", 525, 238 -7);
+  text("Lines", 525, 308-7);
+  text("Hold", holdBoxX + holdBoxWidth / 2, holdBoxY + 25);
 
   // Draw the actual info
   textSize(24);
   textAlign(RIGHT);
-  text(currentScore, 560, 135);
-  text(currentLevel, 560, 260);
-  text(linesCleared, 560, 330);
+  text(currentScore, 560, 135-7);
+  text(currentLevel, 560, 260-7);
+  text(linesCleared, 560, 330-7);
 
   // Draw the game border
   stroke(colorDark);
   line(gameEdgeRight, 0, gameEdgeRight, height);
 
+  // Show grid pieces
+  for (let i = 0; i < gridPieces.length; i++) {
+    gridPieces[i].show();
+  }
+
+  // Show the shadow piece
+  if (!pauseGame) {
+    fallingPiece.showShadow();
+  }
+
   // Show the falling piece
   fallingPiece.show();
+
+  // Show the held piece
+  if (heldPiece) {
+    heldPiece.showHold();
+  }
 
   // Speed up the falling piece if the down arrow is pressed
   if (keyIsDown(DOWN_ARROW)) {
@@ -172,11 +227,6 @@ function draw() {
     }
   }
 
-  // Show the grid pieces
-  for (let i = 0; i < gridPieces.length; i++) {
-    gridPieces[i].show();
-  }
-
   // Show the fading lines
   for (let i = 0; i < lineFades.length; i++) {
     lineFades[i].show();
@@ -192,12 +242,13 @@ function draw() {
   fill(255);
   noStroke();
   textSize(14);
-  text("Controls:\n↑\n← ↓ →\n", 75, 155);
-  text("Left and Right:\nmove side to side", 75, 230);
-  text("Up:\nrotate", 75, 280);
-  text("Down:\nfall faster", 75, 330);
-  text("R:\nreset game", 75, 380);
-  text("Space:\ninstantly drop", 75, 430);
+  text("Controls:\n↑\n← ↓ →\n", 75, 155 + 40);
+  text("Left and Right:\nmove side to side", 75, 230 + 20);
+  text("Up:\nrotate", 75, 280 + 20);
+  text("Down:\nfall faster", 75, 330 + 20);
+  text("C:\nhold piece", 75, 380 + 20);
+  text("Space:\ninstantly drop", 75, 430 + 20);
+  text("R:\nreset game", 75, 480 + 20);
 
   // Show the game over text
   if (gameOver) {
@@ -214,36 +265,56 @@ function draw() {
   rect(0, 0, width, height);
 }
 
+// Handle mouse clicks for the start button
+function mousePressed() {
+  if (!gameStarted) {
+    // Check if click is within button bounds
+    if (
+      mouseX >= buttonX &&
+      mouseX <= buttonX + buttonWidth &&
+      mouseY >= buttonY &&
+      mouseY <= buttonY + buttonHeight
+    ) {
+      gameStarted = true;
+      fallingPiece.resetPiece(); // Initialize the first piece
+    }
+  }
+}
+
 function keyPressed() {
-
-  if (keyCode === 32) {
-    // Spacebar
-    while (!fallingPiece.futureCollision(0, fallSpeed, fallingPiece.rotation)) {
-      fallingPiece.addPos(0, fallSpeed);
-    }
-    // Once collision is detected, lock the piece immediately
-    fallingPiece.commitShape();
-  }
-
-  if (keyCode === 82) {
-    resetGame();
-  }
-  if (!pauseGame) {
-    if (keyCode === LEFT_ARROW) {
-      if (!moveHoldLeft) {
-        fallingPiece.input(LEFT_ARROW);
-        moveHoldTimerLeft = millis() + initialDelay;
+  if (gameStarted) {
+    if (keyCode === 82) {
+      // R to reset
+      resetGame();
+    } else if (!pauseGame) {
+      if (keyCode === 32) {
+        // Spacebar
+        while (!fallingPiece.futureCollision(0, fallSpeed, fallingPiece.rotation)) {
+          fallingPiece.addPos(0, fallSpeed);
+        }
+        // Once collision is detected, lock the piece immediately
+        fallingPiece.commitShape();
+      } else if (keyCode === 67) {
+        // C to hold, with debounce
+        if (millis() - lastHoldTime >= holdCooldown) {
+          fallingPiece.holdPiece();
+          lastHoldTime = millis();
+        }
+      } else if (keyCode === LEFT_ARROW) {
+        if (!moveHoldLeft) {
+          fallingPiece.input(LEFT_ARROW);
+          moveHoldTimerLeft = millis() + initialDelay;
+        }
+        moveHoldLeft = true;
+      } else if (keyCode === RIGHT_ARROW) {
+        if (!moveHoldRight) {
+          fallingPiece.input(RIGHT_ARROW);
+          moveHoldTimerRight = millis() + initialDelay;
+        }
+        moveHoldRight = true;
+      } else if (keyCode === UP_ARROW) {
+        fallingPiece.input(UP_ARROW);
       }
-      moveHoldLeft = true;
-    } else if (keyCode === RIGHT_ARROW) {
-      if (!moveHoldRight) {
-        fallingPiece.input(RIGHT_ARROW);
-        moveHoldTimerRight = millis() + initialDelay;
-      }
-      moveHoldRight = true;
-    }
-    if (keyCode === UP_ARROW) {
-      fallingPiece.input(UP_ARROW);
     }
   }
 }
@@ -268,6 +339,7 @@ class PlayPiece {
     this.pieces = [];
     this.orientation = [];
     this.fallen = false;
+    this.holdPieces = [];
   }
 
   // Generate the next piece
@@ -302,12 +374,60 @@ class PlayPiece {
     }
   }
 
-  findLandingY() {
-    let testY = this.y;
-    while (!this.futureCollision(0, fallSpeed, this.rotation, testY)) {
-      testY += fallSpeed;
+  // Generate the held piece display
+  generateHoldPieces() {
+    this.holdPieces = [];
+
+    const points = orientPoints(this.pieceType, 0);
+    let xx = holdBoxX + 65,
+      yy = holdBoxY + 80;
+
+    if (
+      this.pieceType !== 0 &&
+      this.pieceType !== 3 &&
+      this.pieceType !== 5
+    ) {
+      xx += gridSpace * 0.5;
     }
-    return testY;
+
+    if (this.pieceType == 5) {
+      xx -= gridSpace * 0.5;
+    }
+
+    for (let i = 0; i < 4; i++) {
+      this.holdPieces.push(
+        new Square(
+          xx + points[i][0] * gridSpace,
+          yy + points[i][1] * gridSpace,
+          this.pieceType
+        )
+      );
+    }
+  }
+
+  // Hold the current piece
+  holdPiece() {
+    if (!canHold) return;
+
+    if (!heldPiece) {
+      // First hold: store current piece
+      heldPiece = new PlayPiece();
+      heldPiece.pieceType = this.pieceType;
+      heldPiece.rotation = 0;
+      heldPiece.generateHoldPieces();
+      this.resetPiece();
+    } else {
+      // Swap with held piece
+      let tempType = this.pieceType;
+      this.pieceType = heldPiece.pieceType;
+      heldPiece.pieceType = tempType;
+      this.rotation = 0;
+      this.pos.x = 330;
+      this.pos.y = -60;
+      this.newPoints();
+      heldPiece.generateHoldPieces();
+    }
+    canHold = false;
   }
 
   // Make the piece fall
@@ -321,7 +441,6 @@ class PlayPiece {
         gameOver = true;
       } else {
         this.commitShape();
-        canHold = true; // Allow holding a new piece after it lands
       }
     }
   }
@@ -337,6 +456,7 @@ class PlayPiece {
 
     this.nextPiece();
     this.newPoints();
+    canHold = true; // Allow holding new piece
   }
 
   // Generate the points for the current piece
@@ -385,7 +505,7 @@ class PlayPiece {
   futureCollision(x, y, rotation) {
     let xx,
       yy,
-      points = 0;
+      points = null;
     if (rotation !== this.rotation) {
       points = orientPoints(this.pieceType, rotation);
     }
@@ -422,6 +542,36 @@ class PlayPiece {
         }
       }
     }
+    return false;
+  }
+
+  // Calculate the shadow position
+  getShadowY() {
+    let offsetY = 0;
+    while (!this.futureCollision(0, offsetY + gridSpace, this.rotation)) {
+      offsetY += gridSpace;
+    }
+    // Snap to grid to prevent jumping
+    return Math.round((this.pos.y + offsetY) / gridSpace) * gridSpace;
+  }
+
+  // Show the shadow piece
+  showShadow() {
+    if (!this.pieces || this.pieces.length === 0) return;
+
+    const shadowY = this.getShadowY();
+    const points = orientPoints(this.pieceType, this.rotation);
+
+    push();
+    for (let i = 0; i < points.length; i++) {
+      let x = this.pos.x + points[i][0] * gridSpace;
+      let y = shadowY + points[i][1] * gridSpace;
+      strokeWeight(2);
+      stroke("#00000080"); // Semi-transparent black outline
+      noFill(); // Outline only for clarity
+      rect(x, y, gridSpace - 1, gridSpace - 1);
+    }
+    pop();
   }
 
   // Handle user input
@@ -450,22 +600,20 @@ class PlayPiece {
     }
   }
 
-  // Rotate the current piece
-  rotate() {
-    this.rotation += 1;
-    if (this.rotation > 3) {
-      this.rotation = 0;
-    }
-    this.updatePoints();
-  }
-
-  // Show the current piece
+  // Show the current piece and next piece
   show() {
     for (let i = 0; i < this.pieces.length; i++) {
       this.pieces[i].show();
     }
     for (let i = 0; i < this.nextPieces.length; i++) {
       this.nextPieces[i].show();
+    }
+  }
+
+  // Show the held piece
+  showHold() {
+    for (let i = 0; i < this.holdPieces.length; i++) {
+      this.holdPieces[i].show();
     }
   }
 
@@ -524,7 +672,6 @@ function analyzeGrid() {
     if (linesCleared % 5 === 0) {
       currentLevel += 1;
       if (updateEveryCurrent > 2) {
-        // updateEveryCurrent -= 5; too fastttt
         updateEveryCurrent = Math.max(2, Math.floor(updateEveryCurrent * 0.9));
       }
     }
@@ -571,7 +718,7 @@ class Worker {
   work() {
     if (this.amountActual < this.amountTotal) {
       for (let j = 0; j < gridPieces.length; j++) {
-        if (gridPieces[j].pos.y < y) {
+        if (gridPieces[j].pos.y < this.yVal) {
           gridPieces[j].pos.y += 5;
         }
       }
@@ -598,8 +745,12 @@ function resetGame() {
   fallSpeed = gridSpace * 0.5;
   pauseGame = false;
   gameOver = false;
+  heldPiece = null; // Reset held piece
+  canHold = true;
+  lastHoldTime = 0;
 
   // Reset movement holds
   moveHoldLeft = false;
   moveHoldRight = false;
+  gameStarted = false; // Return to start screen
 }
