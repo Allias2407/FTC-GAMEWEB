@@ -3,6 +3,9 @@ const gridSpace = 30;
 
 // Declare variables
 // let gameStarted = false;
+let heldPiece = null; // This will store the held piece
+let canHold = true; // Prevent multiple holds in a row
+
 let fallingPiece;
 let gridPieces = [];
 let lineFades = [];
@@ -72,12 +75,6 @@ function draw() {
 
   // Set the background color
   background(colorBackground);
-
-//   // press to start
-//   if (!gameStarted) {
-//     showStartScreen();
-//     return; // stop the rest of draw()
-//   }
 
   // Draw the right side info panel
   fill(25);
@@ -200,6 +197,7 @@ function draw() {
   text("Up:\nrotate", 75, 280);
   text("Down:\nfall faster", 75, 330);
   text("R:\nreset game", 75, 380);
+  text("Space:\ninstantly drop", 75, 430);
 
   // Show the game over text
   if (gameOver) {
@@ -216,30 +214,16 @@ function draw() {
   rect(0, 0, width, height);
 }
 
-// uncomment if Function called when a key is pressed
-// function keyPressed() {
-//     if (keyCode === 82) {
-//         // 'R' key
-//         resetGame();
-//     }
-//     if (!pauseGame) {
-//         if (keyCode === LEFT_ARROW) {
-//             fallingPiece.input(LEFT_ARROW);
-//         } else if (keyCode === RIGHT_ARROW) {
-//             fallingPiece.input(RIGHT_ARROW);
-//         }
-//         if (keyCode === UP_ARROW) {
-//             fallingPiece.input(UP_ARROW);
-//         }
-//     }
-// }
-
 function keyPressed() {
-//   if (!gameStarted) {
-//     gameStarted = true;
-//     resetGame(); // optional, if you want a clean start
-//     return;
-//   }
+
+  if (keyCode === 32) {
+    // Spacebar
+    while (!fallingPiece.futureCollision(0, fallSpeed, fallingPiece.rotation)) {
+      fallingPiece.addPos(0, fallSpeed);
+    }
+    // Once collision is detected, lock the piece immediately
+    fallingPiece.commitShape();
+  }
 
   if (keyCode === 82) {
     resetGame();
@@ -318,6 +302,14 @@ class PlayPiece {
     }
   }
 
+  findLandingY() {
+    let testY = this.y;
+    while (!this.futureCollision(0, fallSpeed, this.rotation, testY)) {
+      testY += fallSpeed;
+    }
+    return testY;
+  }
+
   // Make the piece fall
   fall(amount) {
     if (!this.futureCollision(0, amount, this.rotation)) {
@@ -329,6 +321,7 @@ class PlayPiece {
         gameOver = true;
       } else {
         this.commitShape();
+        canHold = true; // Allow holding a new piece after it lands
       }
     }
   }
