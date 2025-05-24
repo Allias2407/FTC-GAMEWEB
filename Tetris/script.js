@@ -426,6 +426,7 @@ class PlayPiece {
       this.pos.y = -60;
       this.newPoints();
       heldPiece.generateHoldPieces();
+      this.nextPiece(); // Update the next piece display after swap
     }
     canHold = false;
   }
